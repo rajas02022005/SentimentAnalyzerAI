@@ -1,26 +1,37 @@
-# app.py
 import streamlit as st
-from transformers import pipeline
+from textblob import TextBlob
 
-st.set_page_config(page_title="Sentiment Analyzer AI", page_icon="💬")
+# Set page config
+st.set_page_config(
+    page_title="AI Sentiment Analyzer",
+    page_icon="💬",
+    layout="centered"
+)
+
+# Title and UI
 st.title("💬 AI-Powered Sentiment Analyzer")
-st.write("Enter a sentence below and let the AI tell you the sentiment!")
+st.markdown("Enter text below to analyze its **sentiment** using Natural Language Processing.")
 
-# Load model
-@st.cache_resource
-def load_model():
-    return pipeline("sentiment-analysis")
-
-analyzer = load_model()
-
-# Input from user
+# Input box
 user_input = st.text_area("Enter your text here:")
 
-if st.button("Analyze"):
-    if user_input.strip() == "":
-        st.warning("Please enter some text.")
+# Function to analyze sentiment
+def analyze_sentiment(text):
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+
+    if polarity > 0:
+        return "Positive 😊"
+    elif polarity == 0:
+        return "Neutral 😐"
     else:
-        with st.spinner("Analyzing..."):
-            result = analyzer(user_input)[0]
-            st.success(f"**Sentiment:** {result['label']}")
-            st.info(f"**Confidence:** {round(result['score'] * 100, 2)}%")
+        return "Negative 😞"
+
+# Button to analyze
+if st.button("Analyze"):
+    if user_input.strip() != "":
+        result = analyze_sentiment(user_input)
+        st.subheader("Sentiment Result:")
+        st.success(result)
+    else:
+        st.warning("Please enter some text to analyze.")
